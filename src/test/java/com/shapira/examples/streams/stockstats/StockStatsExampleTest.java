@@ -1,6 +1,5 @@
 package com.shapira.examples.streams.stockstats;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
 import com.shapira.examples.streams.stockstats.model.TickerWindow;
 import com.shapira.examples.streams.stockstats.model.Trade;
@@ -18,6 +17,7 @@ import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.serialization.Deserializer;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
+import org.apache.kafka.streams.KeyValue;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -42,50 +42,42 @@ public class StockStatsExampleTest {
             new ProducerRecord<>(Constants.STOCK_TOPIC, null, 1500000006000L, "BANANA", new Trade("ACK", "BANANA", 400, 10))
     );
 
-    private static ImmutableMap<String, String> expected = ImmutableMap.<String, String>builder()
-            .put("{\"ticker\":\"APPLE\",\"timestamp\":1499999996000}", "{\"type\":\"ACK\",\"ticker\":\"APPLE\",\"countTrades\":1,\"sumPrice\":100.0,\"minPrice\":100.0,\"avgPrice\":100.0}")
-            .put("{\"ticker\":\"BANANA\",\"timestamp\":1499999996000}", "{\"type\":\"ACK\",\"ticker\":\"BANANA\",\"countTrades\":1,\"sumPrice\":200.0,\"minPrice\":200.0,\"avgPrice\":200.0}")
-            .put("{\"ticker\":\"APPLE\",\"timestamp\":1499999997000}", "{\"type\":\"ACK\",\"ticker\":\"APPLE\",\"countTrades\":2,\"sumPrice\":200.0,\"minPrice\":100.0,\"avgPrice\":100.0}")
-            .put("{\"ticker\":\"APPLE\",\"timestamp\":1499999998000}", "{\"type\":\"ACK\",\"ticker\":\"APPLE\",\"countTrades\":2,\"sumPrice\":200.0,\"minPrice\":100.0,\"avgPrice\":100.0}")
-            .put("{\"ticker\":\"APPLE\",\"timestamp\":1499999999000}", "{\"type\":\"ACK\",\"ticker\":\"APPLE\",\"countTrades\":2,\"sumPrice\":200.0,\"minPrice\":100.0,\"avgPrice\":100.0}")
-            .put("{\"ticker\":\"APPLE\",\"timestamp\":1500000000000}", "{\"type\":\"ACK\",\"ticker\":\"APPLE\",\"countTrades\":2,\"sumPrice\":200.0,\"minPrice\":100.0,\"avgPrice\":100.0}")
-            .put("{\"ticker\":\"BANANA\",\"timestamp\":1499999997000}", "{\"type\":\"ACK\",\"ticker\":\"BANANA\",\"countTrades\":2,\"sumPrice\":400.0,\"minPrice\":200.0,\"avgPrice\":200.0}")
-            .put("{\"ticker\":\"BANANA\",\"timestamp\":1499999998000}", "{\"type\":\"ACK\",\"ticker\":\"BANANA\",\"countTrades\":2,\"sumPrice\":400.0,\"minPrice\":200.0,\"avgPrice\":200.0}")
-            .put("{\"ticker\":\"BANANA\",\"timestamp\":1499999999000}", "{\"type\":\"ACK\",\"ticker\":\"BANANA\",\"countTrades\":2,\"sumPrice\":400.0,\"minPrice\":200.0,\"avgPrice\":200.0}")
-            .put("{\"ticker\":\"BANANA\",\"timestamp\":1500000000000}", "{\"type\":\"ACK\",\"ticker\":\"BANANA\",\"countTrades\":2,\"sumPrice\":400.0,\"minPrice\":200.0,\"avgPrice\":200.0}")
-            .put("{\"ticker\":\"APPLE\",\"timestamp\":1500000001000}", "{\"type\":\"ACK\",\"ticker\":\"APPLE\",\"countTrades\":2,\"sumPrice\":300.0,\"minPrice\":100.0,\"avgPrice\":150.0}")
-            .put("{\"ticker\":\"BANANA\",\"timestamp\":1500000001000}", "{\"type\":\"ACK\",\"ticker\":\"BANANA\",\"countTrades\":2,\"sumPrice\":600.0,\"minPrice\":200.0,\"avgPrice\":300.0}")
-            .put("{\"ticker\":\"APPLE\",\"timestamp\":1500000002000}", "{\"type\":\"ACK\",\"ticker\":\"APPLE\",\"countTrades\":2,\"sumPrice\":400.0,\"minPrice\":200.0,\"avgPrice\":200.0}")
-            .put("{\"ticker\":\"APPLE\",\"timestamp\":1500000003000}", "{\"type\":\"ACK\",\"ticker\":\"APPLE\",\"countTrades\":2,\"sumPrice\":400.0,\"minPrice\":200.0,\"avgPrice\":200.0}")
-            .put("{\"ticker\":\"APPLE\",\"timestamp\":1500000004000}", "{\"type\":\"ACK\",\"ticker\":\"APPLE\",\"countTrades\":2,\"sumPrice\":400.0,\"minPrice\":200.0,\"avgPrice\":200.0}")
-            .put("{\"ticker\":\"APPLE\",\"timestamp\":1500000005000}", "{\"type\":\"ACK\",\"ticker\":\"APPLE\",\"countTrades\":2,\"sumPrice\":400.0,\"minPrice\":200.0,\"avgPrice\":200.0}")
-            .put("{\"ticker\":\"APPLE\",\"timestamp\":1500000006000}", "{\"type\":\"ACK\",\"ticker\":\"APPLE\",\"countTrades\":1,\"sumPrice\":200.0,\"minPrice\":200.0,\"avgPrice\":200.0}")
-            .put("{\"ticker\":\"BANANA\",\"timestamp\":1500000002000}", "{\"type\":\"ACK\",\"ticker\":\"BANANA\",\"countTrades\":2,\"sumPrice\":800.0,\"minPrice\":400.0,\"avgPrice\":400.0}")
-            .put("{\"ticker\":\"BANANA\",\"timestamp\":1500000003000}", "{\"type\":\"ACK\",\"ticker\":\"BANANA\",\"countTrades\":2,\"sumPrice\":800.0,\"minPrice\":400.0,\"avgPrice\":400.0}")
-            .put("{\"ticker\":\"BANANA\",\"timestamp\":1500000004000}", "{\"type\":\"ACK\",\"ticker\":\"BANANA\",\"countTrades\":2,\"sumPrice\":800.0,\"minPrice\":400.0,\"avgPrice\":400.0}")
-            .put("{\"ticker\":\"BANANA\",\"timestamp\":1500000005000}", "{\"type\":\"ACK\",\"ticker\":\"BANANA\",\"countTrades\":2,\"sumPrice\":800.0,\"minPrice\":400.0,\"avgPrice\":400.0}")
-            .put("{\"ticker\":\"BANANA\",\"timestamp\":1500000006000}", "{\"type\":\"ACK\",\"ticker\":\"BANANA\",\"countTrades\":1,\"sumPrice\":400.0,\"minPrice\":400.0,\"avgPrice\":400.0}")
-            .build();
-
+    private static List<KeyValue<String, String>> expected = Arrays.asList(
+            KeyValue.pair("{\"ticker\":\"APPLE\",\"timestamp\":1499999996000}", "{\"type\":\"ACK\",\"ticker\":\"APPLE\",\"countTrades\":1,\"sumPrice\":100.0,\"minPrice\":100.0,\"avgPrice\":100.0}"),
+            KeyValue.pair("{\"ticker\":\"BANANA\",\"timestamp\":1499999996000}", "{\"type\":\"ACK\",\"ticker\":\"BANANA\",\"countTrades\":1,\"sumPrice\":200.0,\"minPrice\":200.0,\"avgPrice\":200.0}"),
+            KeyValue.pair("{\"ticker\":\"APPLE\",\"timestamp\":1499999997000}", "{\"type\":\"ACK\",\"ticker\":\"APPLE\",\"countTrades\":2,\"sumPrice\":200.0,\"minPrice\":100.0,\"avgPrice\":100.0}"),
+            KeyValue.pair("{\"ticker\":\"APPLE\",\"timestamp\":1499999998000}", "{\"type\":\"ACK\",\"ticker\":\"APPLE\",\"countTrades\":2,\"sumPrice\":200.0,\"minPrice\":100.0,\"avgPrice\":100.0}"),
+            KeyValue.pair("{\"ticker\":\"APPLE\",\"timestamp\":1499999999000}", "{\"type\":\"ACK\",\"ticker\":\"APPLE\",\"countTrades\":2,\"sumPrice\":200.0,\"minPrice\":100.0,\"avgPrice\":100.0}"),
+            KeyValue.pair("{\"ticker\":\"APPLE\",\"timestamp\":1500000000000}", "{\"type\":\"ACK\",\"ticker\":\"APPLE\",\"countTrades\":2,\"sumPrice\":200.0,\"minPrice\":100.0,\"avgPrice\":100.0}"),
+            KeyValue.pair("{\"ticker\":\"BANANA\",\"timestamp\":1499999997000}", "{\"type\":\"ACK\",\"ticker\":\"BANANA\",\"countTrades\":2,\"sumPrice\":400.0,\"minPrice\":200.0,\"avgPrice\":200.0}"),
+            KeyValue.pair("{\"ticker\":\"BANANA\",\"timestamp\":1499999998000}", "{\"type\":\"ACK\",\"ticker\":\"BANANA\",\"countTrades\":2,\"sumPrice\":400.0,\"minPrice\":200.0,\"avgPrice\":200.0}"),
+            KeyValue.pair("{\"ticker\":\"BANANA\",\"timestamp\":1499999999000}", "{\"type\":\"ACK\",\"ticker\":\"BANANA\",\"countTrades\":2,\"sumPrice\":400.0,\"minPrice\":200.0,\"avgPrice\":200.0}"),
+            KeyValue.pair("{\"ticker\":\"BANANA\",\"timestamp\":1500000000000}", "{\"type\":\"ACK\",\"ticker\":\"BANANA\",\"countTrades\":2,\"sumPrice\":400.0,\"minPrice\":200.0,\"avgPrice\":200.0}"),
+            KeyValue.pair("{\"ticker\":\"APPLE\",\"timestamp\":1500000001000}", "{\"type\":\"ACK\",\"ticker\":\"APPLE\",\"countTrades\":2,\"sumPrice\":300.0,\"minPrice\":100.0,\"avgPrice\":150.0}"),
+            KeyValue.pair("{\"ticker\":\"BANANA\",\"timestamp\":1500000001000}", "{\"type\":\"ACK\",\"ticker\":\"BANANA\",\"countTrades\":2,\"sumPrice\":600.0,\"minPrice\":200.0,\"avgPrice\":300.0}"),
+            KeyValue.pair("{\"ticker\":\"APPLE\",\"timestamp\":1500000002000}", "{\"type\":\"ACK\",\"ticker\":\"APPLE\",\"countTrades\":2,\"sumPrice\":400.0,\"minPrice\":200.0,\"avgPrice\":200.0}"),
+            KeyValue.pair("{\"ticker\":\"APPLE\",\"timestamp\":1500000003000}", "{\"type\":\"ACK\",\"ticker\":\"APPLE\",\"countTrades\":2,\"sumPrice\":400.0,\"minPrice\":200.0,\"avgPrice\":200.0}"),
+            KeyValue.pair("{\"ticker\":\"APPLE\",\"timestamp\":1500000004000}", "{\"type\":\"ACK\",\"ticker\":\"APPLE\",\"countTrades\":2,\"sumPrice\":400.0,\"minPrice\":200.0,\"avgPrice\":200.0}"),
+            KeyValue.pair("{\"ticker\":\"APPLE\",\"timestamp\":1500000005000}", "{\"type\":\"ACK\",\"ticker\":\"APPLE\",\"countTrades\":2,\"sumPrice\":400.0,\"minPrice\":200.0,\"avgPrice\":200.0}"),
+            KeyValue.pair("{\"ticker\":\"APPLE\",\"timestamp\":1500000006000}", "{\"type\":\"ACK\",\"ticker\":\"APPLE\",\"countTrades\":1,\"sumPrice\":200.0,\"minPrice\":200.0,\"avgPrice\":200.0}"),
+            KeyValue.pair("{\"ticker\":\"BANANA\",\"timestamp\":1500000002000}", "{\"type\":\"ACK\",\"ticker\":\"BANANA\",\"countTrades\":2,\"sumPrice\":800.0,\"minPrice\":400.0,\"avgPrice\":400.0}"),
+            KeyValue.pair("{\"ticker\":\"BANANA\",\"timestamp\":1500000003000}", "{\"type\":\"ACK\",\"ticker\":\"BANANA\",\"countTrades\":2,\"sumPrice\":800.0,\"minPrice\":400.0,\"avgPrice\":400.0}"),
+            KeyValue.pair("{\"ticker\":\"BANANA\",\"timestamp\":1500000004000}", "{\"type\":\"ACK\",\"ticker\":\"BANANA\",\"countTrades\":2,\"sumPrice\":800.0,\"minPrice\":400.0,\"avgPrice\":400.0}"),
+            KeyValue.pair("{\"ticker\":\"BANANA\",\"timestamp\":1500000005000}", "{\"type\":\"ACK\",\"ticker\":\"BANANA\",\"countTrades\":2,\"sumPrice\":800.0,\"minPrice\":400.0,\"avgPrice\":400.0}"),
+            KeyValue.pair("{\"ticker\":\"BANANA\",\"timestamp\":1500000006000}", "{\"type\":\"ACK\",\"ticker\":\"BANANA\",\"countTrades\":1,\"sumPrice\":400.0,\"minPrice\":400.0,\"avgPrice\":400.0}"));
 
     @Rule
     public LocalKafkaResource server = new LocalKafkaResource("stockstat");
 
     @Test
     public void run() throws Exception {
-
         sendStockStat();
 
         StockStatsExample.main(new String[]{});
 
         ConsumerRecords<String, String> records = receiveStockStats();
 
-        for (Map.Entry<String, String> e : expected.entrySet()) {
-            assertThat(records).anySatisfy(r -> {
-                assertThat(r.key()).isEqualTo(e.getKey());
-                assertThat(r.value()).isEqualTo(e.getValue());
-            });
-        }
+        assertThat(records).extracting(r -> KeyValue.pair(r.key(), r.value())).containsAll(expected);
     }
 
     private void sendStockStat() {
