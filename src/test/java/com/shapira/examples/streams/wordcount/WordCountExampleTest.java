@@ -1,7 +1,6 @@
 package com.shapira.examples.streams.wordcount;
 
-import com.ueokande.kafka1.LocalKafkaServer;
-import org.apache.commons.io.FileUtils;
+import com.ueokande.rules.rules.LocalKafkaResource;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
@@ -11,13 +10,9 @@ import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
 
-import java.io.File;
 import java.util.Properties;
 import java.util.regex.Pattern;
 
@@ -25,25 +20,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class WordCountExampleTest {
 
-    private LocalKafkaServer server;
-
     @Rule
-    public TemporaryFolder zkDataDir = new TemporaryFolder();
-
-    @Rule
-    public TemporaryFolder kafkaDataDir = new TemporaryFolder();
-
-    @Before
-    public void before() throws Exception {
-        FileUtils.forceDelete(new File("/tmp/kafka-streams/wordcount"));
-        server = new LocalKafkaServer(zkDataDir.getRoot(), kafkaDataDir.getRoot());
-        server.start();
-    }
-
-    @After
-    public void after() {
-        server.close();
-    }
+    public LocalKafkaResource kafka = new LocalKafkaResource("wordcount");
 
     @Test
     public void run() throws Exception {

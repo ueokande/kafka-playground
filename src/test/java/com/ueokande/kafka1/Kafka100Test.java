@@ -1,6 +1,7 @@
 package com.ueokande.kafka1;
 
 import com.google.common.primitives.Longs;
+import com.ueokande.rules.rules.LocalKafkaResource;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
@@ -11,11 +12,8 @@ import org.apache.kafka.common.header.internals.RecordHeader;
 import org.apache.kafka.common.header.internals.RecordHeaders;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
 
 import java.util.Properties;
 import java.util.regex.Pattern;
@@ -24,24 +22,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class Kafka100Test {
 
-    private LocalKafkaServer server;
-
     @Rule
-    public TemporaryFolder zkDataDir = new TemporaryFolder();
-
-    @Rule
-    public TemporaryFolder kafkaDataDir = new TemporaryFolder();
-
-    @Before
-    public void before() throws Exception {
-        server = new LocalKafkaServer(zkDataDir.getRoot(), kafkaDataDir.getRoot());
-        server.start();
-    }
-
-    @After
-    public void after() {
-        server.close();
-    }
+    public LocalKafkaResource server = new LocalKafkaResource();
 
     @Test
     public void kafkaHeaderTest() throws Exception {

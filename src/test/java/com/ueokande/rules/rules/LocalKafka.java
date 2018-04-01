@@ -1,4 +1,4 @@
-package com.ueokande.kafka1;
+package com.ueokande.rules.rules;
 
 import kafka.server.KafkaConfig;
 import kafka.server.KafkaServerStartable;
@@ -6,7 +6,7 @@ import kafka.server.KafkaServerStartable;
 import java.io.File;
 import java.util.Properties;
 
-public class LocalKafka {
+class LocalKafka {
     private final KafkaServerStartable server;
 
     LocalKafka(Properties props) {

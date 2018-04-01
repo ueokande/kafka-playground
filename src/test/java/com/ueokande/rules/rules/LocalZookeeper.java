@@ -1,4 +1,4 @@
-package com.ueokande.kafka1;
+package com.ueokande.rules.rules;
 
 import org.apache.zookeeper.server.ServerConfig;
 import org.apache.zookeeper.server.ZooKeeperServerMain;
@@ -8,7 +8,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Properties;
 
-public class LocalZookeeper {
+class LocalZookeeper {
     private final ServerConfig zkConfig;
 
     LocalZookeeper(Properties props) throws IOException, QuorumPeerConfig.ConfigException {
